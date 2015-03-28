@@ -50,7 +50,7 @@ curl_setopt($curl_session, CURLOPT_SSL_VERIFYPEER, false); // *** SHOULD BE TRUE
 
 // let's check using the conventional token procedure first
 curl_setopt($curl_session, CURLOPT_POST, true);
-$credentials = 'moodlewsrestformat=json&username=' . urlencode($username) . '&password=' . urlencode($password) . '&service=' . urlencode($service);
+$credentials = 'username=' . urlencode($username) . '&password=' . urlencode($password) . '&service=' . urlencode($service);
 curl_setopt($curl_session, CURLOPT_POSTFIELDS, $credentials);
 curl_setopt($curl_session, CURLOPT_REFERER, '');
 $url = $base . '/login/token.php';
@@ -58,7 +58,7 @@ curl_setopt($curl_session, CURLOPT_URL, $url);
 $ar = read_url($curl_session);
 if (isset($debug)) {
 	print('<h4>' . $url . '</h4>');
-	if ($debug > 1) {
+	if ($debug > 2) {
 		$body = str_replace('<', '{', $ar[1]);
 		$body = str_replace('>', '}', $body);
 		print('<p>' . $ar[0] . '<p>' . $body);
@@ -76,7 +76,7 @@ if (strpos($ar[1], '"token"') > 0) { // we have a token
 curl_setopt($curl_session, CURLOPT_HTTPGET, true);
 curl_setopt ($curl_session, CURLOPT_POSTFIELDS, '');
 curl_setopt($curl_session, CURLOPT_REFERER, '');
-$url = $base . '/local/mobile/launch.php?passport=666&service=' . $service;
+$url = $base . '/local/mobile/launch.php?passport=666&service=' . $service; // we don't set/verify a passport
 $cookie_store = array();
 do {
 	if (isset($debug)) {
@@ -117,11 +117,11 @@ do {
 		}
 		set_cookies($cookie_store, $u['host'], $headers['Set-Cookie']);
 	}
-	if (($headers['Status'] == '302') || ($headers['Status'] == '303')){
-		if (substr($headers['Location'], 0, 12) == 'moodlemobile') { // the custom URL scheme says that we've arrived
-			$token = base64_decode(substr($headers['Location'], (strpos($headers['Location'], '=') + 1)));
-			echo(json_encode(array('token' => substr($token, (strpos($token, ':::') + 3)))));
-			break;
+	if (($headers['Status'] == '301') || ($headers['Status'] == '302') || ($headers['Status'] == '303')) { // redirect
+		if (substr($headers['Location'], 0, 12) == 'moodlemobile') { // use of the custom URL scheme indicates that we've arrived
+			$token = base64_decode(substr($headers['Location'], (strpos($headers['Location'], '=') + 1))); // decode token...
+			echo(json_encode(array('token' => substr($token, (strpos($token, ':::') + 3))))); // ...and output it
+			break; // that's all folks - thank you and good night.
 		}
 		curl_setopt($curl_session, CURLOPT_REFERER, $url);
 		curl_setopt($curl_session, CURLOPT_HTTPGET, true);
