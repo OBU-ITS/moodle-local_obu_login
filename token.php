@@ -35,20 +35,24 @@ if (!isset($debug)) {
 	header('Content-Type: application/json');
 }
 
+// check, at least, that the required parameters are there
+if (!isset($username) || !isset($password) || !isset($service)) {
+	die(json_encode(array('error' => 'Missing parameter(s)'))); // bail out
+}
+
 require_once('./locallib.php');
 
 $curl_session = curl_init();
 curl_setopt($curl_session, CURLOPT_ENCODING, 'gzip, deflate');
 curl_setopt($curl_session, CURLOPT_HEADER, true);
-curl_setopt($curl_session, CURLOPT_HTTPHEADER, array('Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8', 'Accept-Language: en-US'));
-curl_setopt($curl_session, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-curl_setopt($curl_session, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2'); // no, not really!
+curl_setopt($curl_session, CURLOPT_HTTPHEADER, array('Accept: text/html', 'Accept-Language: en-US'));
+curl_setopt($curl_session, CURLOPT_USERAGENT, 'OBU Login');
 curl_setopt($curl_session, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl_session, CURLOPT_TIMEOUT, 30);
 curl_setopt($curl_session, CURLOPT_SSL_VERIFYHOST, 0); // *** SHOULD BE 2 (THE DEFAULT) BUT WE'RE USING SELF_SIGNED CERTIFICATES FOR TESTING ***
 curl_setopt($curl_session, CURLOPT_SSL_VERIFYPEER, false); // *** SHOULD BE TRUE (THE DEFAULT) ***
 
-// let's check using the conventional token procedure first
+// let's try and authenticate using the conventional token procedure first
 curl_setopt($curl_session, CURLOPT_POST, true);
 $credentials = 'username=' . urlencode($username) . '&password=' . urlencode($password) . '&service=' . urlencode($service);
 curl_setopt($curl_session, CURLOPT_POSTFIELDS, $credentials);
@@ -72,7 +76,7 @@ if (strpos($ar[1], '"token"') > 0) { // we have a token
 	die(json_encode(array('error' => 'Token procedure failed'))); // bail out
 }
 
-// OK, let's go Shibboleth (cURL auto redirects would fail due to the custom URL scheme)
+// OK, we'll have to try Shibboleth authentication (cURL auto redirects would fail due to the custom URL scheme)
 curl_setopt($curl_session, CURLOPT_HTTPGET, true);
 curl_setopt ($curl_session, CURLOPT_POSTFIELDS, '');
 curl_setopt($curl_session, CURLOPT_REFERER, '');
