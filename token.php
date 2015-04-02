@@ -22,25 +22,28 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
+
+// this is the live version so...
+if (isset($_REQUEST['debug'])) {
+	die;
+}
  
+if (!isset($_REQUEST['debug'])) {
+	header('Content-Type: application/json');
+}
+
+// check, at least, that the required parameters are there
+if (!isset($_REQUEST['username']) || !isset($_REQUEST['password']) || !isset($_REQUEST['service'])) {
+	die(json_encode(array('error' => 'Missing parameter(s)'))); // bail out
+}
+
+require_once('./locallib.php');
+
 if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on')) {
 	$base = 'https://' . $_SERVER['HTTP_HOST'];
 } else {
 	$base = 'http://' . $_SERVER['HTTP_HOST'];
 }
-
-parse_str($_SERVER['QUERY_STRING']); // get username, password, web service and debug level (if any)
-
-if (!isset($debug)) {
-	header('Content-Type: application/json');
-}
-
-// check, at least, that the required parameters are there
-if (!isset($username) || !isset($password) || !isset($service)) {
-	die(json_encode(array('error' => 'Missing parameter(s)'))); // bail out
-}
-
-require_once('./locallib.php');
 
 $curl_session = curl_init();
 curl_setopt($curl_session, CURLOPT_ENCODING, 'gzip, deflate');
@@ -49,20 +52,18 @@ curl_setopt($curl_session, CURLOPT_HTTPHEADER, array('Accept: text/html', 'Accep
 curl_setopt($curl_session, CURLOPT_USERAGENT, 'OBU Login');
 curl_setopt($curl_session, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl_session, CURLOPT_TIMEOUT, 30);
-curl_setopt($curl_session, CURLOPT_SSL_VERIFYHOST, 0); // *** SHOULD BE 2 (THE DEFAULT) BUT WE'RE USING SELF_SIGNED CERTIFICATES FOR TESTING ***
-curl_setopt($curl_session, CURLOPT_SSL_VERIFYPEER, false); // *** SHOULD BE TRUE (THE DEFAULT) ***
 
 // let's try and authenticate using the conventional token procedure first
 curl_setopt($curl_session, CURLOPT_POST, true);
-$credentials = 'username=' . urlencode($username) . '&password=' . urlencode($password) . '&service=' . urlencode($service);
+$credentials = 'username=' . urlencode($_REQUEST['username']) . '&password=' . urlencode($_REQUEST['password']) . '&service=' . urlencode($_REQUEST['service']);
 curl_setopt($curl_session, CURLOPT_POSTFIELDS, $credentials);
 curl_setopt($curl_session, CURLOPT_REFERER, '');
 $url = $base . '/login/token.php';
 curl_setopt($curl_session, CURLOPT_URL, $url);
 $ar = read_url($curl_session);
-if (isset($debug)) {
+if (isset($_REQUEST['debug'])) {
 	print('<h4>' . $url . '</h4>');
-	if ($debug > 2) {
+	if ($_REQUEST['debug'] > 2) {
 		$body = str_replace('<', '{', $ar[1]);
 		$body = str_replace('>', '}', $body);
 		print('<p>' . $ar[0] . '<p>' . $body);
@@ -80,10 +81,10 @@ if (strpos($ar[1], '"token"') > 0) { // we have a token
 curl_setopt($curl_session, CURLOPT_HTTPGET, true);
 curl_setopt ($curl_session, CURLOPT_POSTFIELDS, '');
 curl_setopt($curl_session, CURLOPT_REFERER, '');
-$url = $base . '/local/mobile/launch.php?passport=666&service=' . $service; // we don't set/verify a passport
+$url = $base . '/local/obu_login/launch.php?passport=666&service=' . $_REQUEST['service']; // we don't set/verify a passport
 $cookie_store = array();
 do {
-	if (isset($debug)) {
+	if (isset($_REQUEST['debug'])) {
 		print('<h4>' . $url . '</h4>');
 	}
 	curl_setopt($curl_session, CURLOPT_URL, $url);
@@ -96,14 +97,14 @@ do {
 	$path = $u['host'] . $path;
 	$cookies = get_cookies($cookie_store, $path);
 	if ($cookies != "") {
-		if (isset($debug) && ($debug > 1)) {
+		if (isset($_REQUEST['debug']) && ($_REQUEST['debug'] > 1)) {
 			print($cookies . '<br>');
 		}
 		curl_setopt($curl_session, CURLOPT_COOKIE, $cookies);
 	}
 	$ar = read_url($curl_session);
 	
-	if (isset($debug) && ($debug > 2)) {
+	if (isset($_REQUEST['debug']) && ($_REQUEST['debug'] > 2)) {
 		$body = str_replace('<', '{', $ar[1]);
 		$body = str_replace('>', '}', $body);
 		print('<p>' . $ar[0] . '<p>' . $body);
@@ -116,7 +117,7 @@ do {
 	}
 	if (isset($headers['Set-Cookie']))
 	{
-		if (isset($debug) && ($debug > 1)) {
+		if (isset($_REQUEST['debug']) && ($_REQUEST['debug'] > 1)) {
 			print('<i>' . $headers['Set-Cookie'] . '</i><br>');
 		}
 		set_cookies($cookie_store, $u['host'], $headers['Set-Cookie']);
@@ -135,7 +136,7 @@ do {
 			echo(json_encode(array('error' => 'Shibboleth error')));
 			break;
 	} else if (strpos($ar[1], 'Log in to the site') > 0) {
-		// we have the Moodle login form - let's 'select' SSO
+		// we have the Moodle login form - let's 'click' SSO
 		curl_setopt($curl_session, CURLOPT_REFERER, $url);
 		curl_setopt($curl_session, CURLOPT_HTTPGET, true);
 		curl_setopt ($curl_session, CURLOPT_POSTFIELDS, '');
@@ -147,7 +148,7 @@ do {
 			break;
 		}
 		curl_setopt($curl_session, CURLOPT_POST, true);
-		$credentials = 'j_username=' . urlencode($username) . '&j_password=' . urlencode($password);
+		$credentials = 'j_username=' . urlencode($_REQUEST['username']) . '&j_password=' . urlencode($_REQUEST['password']);
 		curl_setopt($curl_session, CURLOPT_POSTFIELDS, $credentials);
 		curl_setopt($curl_session, CURLOPT_REFERER, $url);
 	} else if (strpos($ar[1], 'Continue') > 0) {
