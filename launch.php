@@ -17,19 +17,31 @@
 /**
  * Launch script, launch the app using custom URL schemes.
  *
- * @package    local_mobile
- * @copyright  2014 Juan Leyva <juan@moodle.com>
+ * @package    local_obu_login
+ * @author     Juan Leyva ('/local/moodle/launch.php') modified by Peter Welham (OBU)
+ * @copyright  2014 Juan Leyva <juan@moodle.com> and 2015, Oxford Brookes University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(__FILE__) . '/../../config.php');
 
-$serviceshortname  = required_param('service',  PARAM_ALPHANUMEXT);
-$passport          = required_param('passport',  PARAM_RAW);    // Passport send from the app to validate the response URL.
+////// <-- OBU modified
+$scheme = urldecode(required_param('scheme',  PARAM_ALPHANUMEXT));
+$serviceshortname = urldecode(required_param('service',  PARAM_ALPHANUMEXT));
+$standard = optional_param('standard', 1, PARAM_BOOL);
 
 // If the user is not logged, this will redirect him to the login page.
 // Once logged, it will be redirected again to this page and the app launched.
-require_login(0, false);
+if (!isloggedin() || isguestuser()) {
+	if ($standard) {
+		require_login(0, false);
+	} else { // requires our own non-standard login (which ignores any alternative login URL) 
+		$SESSION->wantsurl = new moodle_url('/local/obu_login/launch.php?scheme=' . urlencode($scheme) . '&service=' . urlencode($serviceshortname));
+		$login = new moodle_url('/local/obu_login/index.php');
+		redirect($login);
+	}
+}
+////// OBU modified -->
 
 // Check web services enabled.
 if (!$CFG->enablewebservices) {
@@ -42,12 +54,16 @@ if (empty($service)) {
     throw new moodle_exception('servicenotavailable', 'webservice');
 }
 
+////// <-- OBU modified
+/*
 // Check if the plugin is properly configured.
 $typeoflogin = get_config('local_mobile', 'typeoflogin');
 
 if (empty($typeoflogin)) {
     throw new moodle_exception('pluginnotenabledorconfigured', 'local_mobile');
 }
+*/
+////// OBU modified -->
 
 // Check if there is any required system capability.
 if ($service->requiredcapability and !has_capability($service->requiredcapability, context_system::instance())) {
@@ -145,7 +161,9 @@ if (count($tokens) > 0) {
             $event->trigger();
         }
     } else {
-        throw new moodle_exception('cannotcreatetoken', 'local_mobile');
+////// <-- OBU modified
+        throw new moodle_exception('cannotcreatetoken', 'local_obu_login');
+////// OBU modified -->
     }
 }
 
@@ -162,14 +180,21 @@ if (class_exists('\core\event\webservice_token_sent')) {
     $event->trigger();
 }
 
+////// <-- OBU modified
+/*
 // This is some type of security.
 // Passport is generated in the app, so the app opening can be validated using that variable.
 // Passports are valid only one time, it's deleted in the app once used.
 
 $siteid = md5($CFG->wwwroot . $passport);   // Passport is used here as salt.
 $apptoken = base64_encode($siteid . ':::' . $token->token);
+*/
+////// OBU modified -->
 
 // Redirect using the custom URL scheme.
-$location = "Location: moodlemobile://token=$apptoken";
+////// <-- OBU modified
+$location = "Location: " . $scheme . "://" . $serviceshortname . "?token=" . $token->token;
+////// OBU modified -->
 header($location);
 die;
+

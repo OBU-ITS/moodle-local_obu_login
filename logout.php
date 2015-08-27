@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * OBU Login - language strings
+ * OBU Login - logout the user
  *
  * @package    local_obu_login
  * @author     Peter Welham
@@ -23,5 +23,22 @@
  *
  */
 
-$string['pluginname'] = 'OBU Login';
-$string['cannotcreatetoken'] = 'Automatic token creation is not available to site administrators (they must create a token manually in the site)';
+require_once(dirname(__FILE__) . '/../../config.php');
+
+$scheme = urldecode(required_param('scheme',  PARAM_ALPHANUMEXT));
+$serviceshortname = urldecode(required_param('service',  PARAM_ALPHANUMEXT));
+
+if (isloggedin()) {
+	$authsequence = get_enabled_auth_plugins(); // auths, in sequence
+	foreach($authsequence as $authname) {
+		$authplugin = get_auth_plugin($authname);
+		$authplugin->logoutpage_hook();
+	}
+}
+
+require_logout();
+
+$location = "Location: " . $scheme . "://" . $serviceshortname;
+header($location);
+die;
+

@@ -81,7 +81,7 @@ if (strpos($ar[1], '"token"') > 0) { // we have a token
 curl_setopt($curl_session, CURLOPT_HTTPGET, true);
 curl_setopt ($curl_session, CURLOPT_POSTFIELDS, '');
 curl_setopt($curl_session, CURLOPT_REFERER, '');
-$url = $base . '/local/obu_login/launch.php?passport=666&service=' . $_REQUEST['service']; // we don't set/verify a passport
+$url = $base . '/local/obu_login/launch.php?scheme=brookes&service=' . $_REQUEST['service'];
 $cookie_store = array();
 do {
 	if (isset($_REQUEST['debug'])) {
@@ -123,15 +123,16 @@ do {
 		set_cookies($cookie_store, $u['host'], $headers['Set-Cookie']);
 	}
 	if (($headers['Status'] == '301') || ($headers['Status'] == '302') || ($headers['Status'] == '303')) { // redirect
-		if (substr($headers['Location'], 0, 12) == 'moodlemobile') { // use of the custom URL scheme indicates that we've arrived
-			$token = base64_decode(substr($headers['Location'], (strpos($headers['Location'], '=') + 1))); // decode token...
-			echo(json_encode(array('token' => substr($token, (strpos($token, ':::') + 3))))); // ...and output it
+		$newurl = $headers['Location'];
+		if (substr($newurl, 0, 7) == 'brookes') { // use of our custom URL scheme indicates that we've arrived
+			$token = substr($newurl, (strpos($newurl, 'token=') + 6)); // extract the token...
+			echo(json_encode(array('token' => $token))); // ...and output it
 			break; // that's all folks - thank you and good night.
 		}
 		curl_setopt($curl_session, CURLOPT_REFERER, $url);
 		curl_setopt($curl_session, CURLOPT_HTTPGET, true);
 		curl_setopt ($curl_session, CURLOPT_POSTFIELDS, '');
-		$url = $headers['Location'];
+		$url = $newurl;
 	} else if ($headers['Status'] != '200') {
 			echo(json_encode(array('error' => 'Shibboleth error')));
 			break;
