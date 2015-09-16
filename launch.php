@@ -26,7 +26,7 @@
 require_once(dirname(__FILE__) . '/../../config.php');
 
 ////// <-- OBU modified
-$scheme = urldecode(required_param('scheme',  PARAM_ALPHANUMEXT));
+$scheme = urldecode(required_param('scheme',  PARAM_RAW));
 $serviceshortname = urldecode(required_param('service',  PARAM_ALPHANUMEXT));
 $standard = optional_param('standard', 1, PARAM_BOOL);
 
@@ -193,7 +193,11 @@ $apptoken = base64_encode($siteid . ':::' . $token->token);
 
 // Redirect using the custom URL scheme.
 ////// <-- OBU modified
-$location = "Location: " . $scheme . "://" . $serviceshortname . "?token=" . $token->token;
+if (strpos($scheme, '://') !== false) { // Full URL is specified for regular browsers 
+	$location = "Location: " . $scheme . "?token=" . $token->token;
+} else { // Use custom scheme for mobile apps
+	$location = "Location: " . $scheme . "://" . $serviceshortname . "?token=" . $token->token;
+}
 ////// OBU modified -->
 header($location);
 die;
