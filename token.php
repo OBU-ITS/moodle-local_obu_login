@@ -23,6 +23,8 @@
  *
  */
 
+header('Access-Control-Allow-Origin: *'); // Allow cross-origin resource sharing (by Google App Engine, for example)
+
 // this is the live version so...
 if (isset($_REQUEST['debug'])) {
 	die;

@@ -25,6 +25,8 @@
 
 require_once(dirname(__FILE__) . '/../../config.php');
 
+header('Access-Control-Allow-Origin: *'); // Allow cross-origin resource sharing (by Google App Engine, for example)
+
 $scheme = urldecode(required_param('scheme',  PARAM_ALPHANUMEXT));
 $serviceshortname = urldecode(required_param('service',  PARAM_ALPHANUMEXT));
 
