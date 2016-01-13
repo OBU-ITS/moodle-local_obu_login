@@ -23,7 +23,7 @@
  *
  */
 
-$plugin->version  = 2015093000;   // The (date) version of this module + 2 extra digital for daily versions
+$plugin->version  = 2016011300;   // The (date) version of this module + 2 extra digital for daily versions
                                   // This version number is displayed into /admin/forms.php
                                   // TODO: if ever this plugin get branched, the old branch number
                                   // will not be updated to the current date but just incremented. We will
@@ -31,5 +31,5 @@ $plugin->version  = 2015093000;   // The (date) version of this module + 2 extra
                                   // display this version number with userdate (dev friendly)
 $plugin->requires = 2012120300;   // Requires this Moodle version - at least 2.0
 $plugin->cron     = 0;
-$plugin->release = 'v2.8.3';
+$plugin->release = 'v2.8.4';
 $plugin->maturity = MATURITY_STABLE;

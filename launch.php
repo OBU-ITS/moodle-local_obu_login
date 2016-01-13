@@ -39,7 +39,8 @@ if (!isloggedin() || isguestuser()) {
 		require_login(0, false);
 	} else { // requires our own non-standard login (which ignores any alternative login URL) 
 		$SESSION->wantsurl = new moodle_url('/local/obu_login/launch.php?scheme=' . urlencode($scheme) . '&service=' . urlencode($serviceshortname));
-		$login = new moodle_url('/local/obu_login/index.php');
+//		$login = new moodle_url('/local/obu_login/index.php');
+		$login = new moodle_url('/login/?authShib=NOSHIB');
 		redirect($login);
 	}
 }
