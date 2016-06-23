@@ -30,13 +30,13 @@ header('Access-Control-Allow-Origin: *'); // Allow cross-origin resource sharing
 $scheme = urldecode(required_param('scheme',  PARAM_ALPHANUMEXT));
 $serviceshortname = urldecode(required_param('service',  PARAM_ALPHANUMEXT));
 
-if (isloggedin()) {
+//if (isloggedin()) {
 	$authsequence = get_enabled_auth_plugins(); // auths, in sequence
 	foreach($authsequence as $authname) {
 		$authplugin = get_auth_plugin($authname);
 		$authplugin->logoutpage_hook();
 	}
-}
+//}
 
 require_logout();
 

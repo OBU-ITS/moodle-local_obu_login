@@ -18,17 +18,13 @@
  *
  * @package    local_obu_login
  * @author     Peter Welham
- * @copyright  2015, Oxford Brookes University
+ * @copyright  2016, Oxford Brookes University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
 
-$plugin->version  = 2016011300;   // The (date) version of this module + 2 extra digital for daily versions
-                                  // This version number is displayed into /admin/forms.php
-                                  // TODO: if ever this plugin get branched, the old branch number
-                                  // will not be updated to the current date but just incremented. We will
-                                  // need then a $plugin->release human friendly date. For the moment, we use
-                                  // display this version number with userdate (dev friendly)
+$plugin->component = 'local_obu_login'; // Full name of the plugin (used for diagnostics): plugintype_pluginname
+$plugin->version  = 2016062300;   // The (date) version of this module + 2 extra digital for daily versions
 $plugin->requires = 2012120300;   // Requires this Moodle version - at least 2.0
 $plugin->cron     = 0;
 $plugin->release = 'v2.8.4';
