@@ -18,12 +18,15 @@
  *
  * @package    local_obu_login
  * @author     Peter Welham
- * @copyright  2016, Oxford Brookes University
+ * @copyright  2017, Oxford Brookes University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
 
 require_once("../../config.php");
+
+header('Access-Control-Allow-Origin: *'); // Allow cross-origin resource sharing (by Google App Engine, for example)
+header('Content-Type: application/json');
 
 if (is_enabled_auth('shibboleth')) {
 	die(json_encode(array('shibboleth' => '1')));
