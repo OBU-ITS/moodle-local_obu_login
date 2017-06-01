@@ -18,7 +18,7 @@
  * Launch script, launch the app using custom URL schemes.
  *
  * @package    local_obu_login
- * @author     Juan Leyva ('/local/moodle/launch.php') modified by Peter Welham (OBU)
+ * @author     Juan Leyva ('/local/mobile/launch.php') modified by Peter Welham (OBU)
  * @copyright  2014 Juan Leyva <juan@moodle.com> and 2015, Oxford Brookes University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -103,9 +103,7 @@ foreach ($tokens as $key => $token) {
     $unsettoken = false;
     // If sid is set then there must be a valid associated session no matter the token type.
     if (!empty($token->sid)) {
-        // TODO, this has changed in 2.6.
-        $session = session_get_instance();
-        if (!$session::session_exists($token->sid)) {
+        if (!\core\session\manager::session_exists($token->sid)) {
             // This token will never be valid anymore, delete it.
             $DB->delete_records('external_tokens', array('sid' => $token->sid));
             $unsettoken = true;
