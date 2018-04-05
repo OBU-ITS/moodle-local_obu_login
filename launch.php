@@ -30,19 +30,25 @@ header('Access-Control-Allow-Origin: *'); // Allow cross-origin resource sharing
 
 $scheme = urldecode(required_param('scheme',  PARAM_RAW));
 $serviceshortname = urldecode(required_param('service',  PARAM_ALPHANUMEXT));
-$standard = optional_param('standard', 1, PARAM_BOOL);
+$standard = optional_param('standard', 0, PARAM_BOOL);
+if ($standard) {
+	$auth = 1;
+} else {
+	$auth = optional_param('auth', 0, PARAM_INT);
+}
 
 // If the user is not logged, this will redirect him to the login page.
 // Once logged, it will be redirected again to this page and the app launched.
 if (!isloggedin() || isguestuser()) {
-	if ($standard) {
-		require_login(0, false);
-	} else { // requires our own non-standard login (which ignores any alternative login URL) 
-		$SESSION->wantsurl = new moodle_url('/local/obu_login/launch.php?scheme=' . urlencode($scheme) . '&service=' . urlencode($serviceshortname));
-//		$login = new moodle_url('/local/obu_login/index.php');
-		$login = new moodle_url('/login/?authShib=NOSHIB');
-		redirect($login);
+	$SESSION->wantsurl = new moodle_url('/local/obu_login/launch.php?scheme=' . urlencode($scheme) . '&service=' . urlencode($serviceshortname));
+	if ($auth == 1) { // Shibboleth
+		$login = new moodle_url('/auth/shibboleth/index.php');
+	} else if ($auth == 3) { // CAS
+		$login = new moodle_url('/local/obu_login/cas_login.php');
+	} else { // requires our own non-standard login (which ignores any alternative login URL)
+		$login = new moodle_url('/local/obu_login/index.php');
 	}
+	redirect($login);
 }
 ////// OBU modified -->
 
