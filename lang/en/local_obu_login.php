@@ -18,10 +18,12 @@
  *
  * @package    local_obu_login
  * @author     Peter Welham
- * @copyright  2015, Oxford Brookes University
+ * @copyright  2019, Oxford Brookes University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
+
+$string['privacy:metadata'] = 'The OBU Login plugin does not store any personal data.';
 
 $string['pluginname'] = 'OBU Login';
 $string['cannotcreatetoken'] = 'Automatic token creation is not available to site administrators (they must create a token manually in the site)';
