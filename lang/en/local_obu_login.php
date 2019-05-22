@@ -27,3 +27,4 @@ $string['privacy:metadata'] = 'The OBU Login plugin does not store any personal 
 
 $string['pluginname'] = 'OBU Login';
 $string['cannotcreatetoken'] = 'Automatic token creation is not available to site administrators (they must create a token manually in the site)';
+$string['forcemethodchangecheckfull'] = 'Are you absolutely sure you want to force a method change to {$a} ?';

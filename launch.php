@@ -42,7 +42,11 @@ if ($standard) {
 if (!isloggedin() || isguestuser()) {
 	$SESSION->wantsurl = new moodle_url('/local/obu_login/launch.php?scheme=' . urlencode($scheme) . '&service=' . urlencode($serviceshortname));
 	if ($auth == 1) { // Shibboleth
-		$login = new moodle_url('/auth/shibboleth/index.php');
+		if (is_enabled_auth('saml2')) {
+			$login = new moodle_url('/auth/saml2/login.php');
+		} else {
+			$login = new moodle_url('/auth/shibboleth/index.php');
+		}
 	} else if ($auth == 3) { // CAS
 		$login = new moodle_url('/local/obu_login/cas_login.php');
 	} else { // requires our own non-standard login (which ignores any alternative login URL)

@@ -18,7 +18,7 @@
  *
  * @package    local_obu_login
  * @author     Peter Welham
- * @copyright  2015, Oxford Brookes University
+ * @copyright  2019, Oxford Brookes University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
@@ -31,9 +31,9 @@ $return = '/';
 
 $from = strtolower(required_param('from', PARAM_TEXT));
 $to = strtolower(required_param('to', PARAM_TEXT));
-if ((($from !== 'ldap') && ($from !== 'shibboleth'))
-	|| (($from === 'ldap') && ($to !== 'shibboleth'))
-	|| (($from === 'shibboleth') && ($to !== 'ldap'))) {
+if ((($from !== 'ldap') && ($from !== 'saml2') && ($from !== 'shibboleth'))
+	|| (($to !== 'ldap') && ($to !== 'saml2') && ($to !== 'shibboleth'))
+	|| ($from === $to)) {
 		redirect($return);
 }
 
@@ -75,7 +75,7 @@ if ($confirm and confirm_sesskey()) {
     echo $OUTPUT->heading(get_string('confirmation', 'admin'));
     $formcontinue = new single_button(new moodle_url('/local/obu_login/method.php', array('from' => $from, 'to' => $to, 'confirm' => 1)), get_string('yes'));
     $formcancel = new single_button(new moodle_url($return), get_string('no'), 'get');
-    echo $OUTPUT->confirm(get_string('forcepasswordchangecheckfull', '', $usernames), $formcontinue, $formcancel);
+    echo $OUTPUT->confirm(get_string('forcemethodchangecheckfull', 'local_obu_login', $usernames), $formcontinue, $formcancel);
 }
 
 echo $OUTPUT->footer();

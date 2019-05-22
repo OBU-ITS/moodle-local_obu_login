@@ -24,8 +24,8 @@
  */
 
 $plugin->component = 'local_obu_login'; // Full name of the plugin (used for diagnostics): plugintype_pluginname
-$plugin->version  = 2019010200;   // The (date) version of this module + 2 extra digital for daily versions
+$plugin->version  = 2019041200;   // The (date) version of this module + 2 extra digital for daily versions
 $plugin->requires = 2012120300;   // Requires this Moodle version - at least 2.0
 $plugin->cron     = 0;
-$plugin->release = 'v2.9.1';
+$plugin->release = 'v2.10.0';
 $plugin->maturity = MATURITY_STABLE;
